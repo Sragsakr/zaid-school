@@ -1,4 +1,6 @@
-import { getPublishedNews } from "@/lib/data";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { getPublishedNews, getSiteSettings } from "@/lib/data";
 import NoticeBoard from "@/components/NoticeBoard";
 import HeroCarousel from "@/components/HeroCarousel";
 import NewsCard from "@/components/NewsCard";
@@ -6,14 +8,32 @@ import CompactNewsItem from "@/components/CompactNewsItem";
 import CategorySection from "@/components/CategorySection";
 import { CATEGORY_LIST } from "@/lib/categories";
 import type { NewsItem } from "@/lib/types";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const revalidate = 60;
 
 const CAROUSEL_SIZE = 5;
 const FEATURED_SIDE_COUNT = 4;
 
+export const metadata: Metadata = {
+  title: "الرئيسية",
+  description: `آخر أخبار وفعاليات وإعلانات ${SITE_NAME}.`,
+  alternates: { canonical: SITE_URL },
+  openGraph: {
+    title: SITE_NAME,
+    description: `آخر أخبار وفعاليات وإعلانات ${SITE_NAME}.`,
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    locale: "ar_EG",
+    type: "website",
+  },
+};
+
 export default async function HomePage() {
-  const news = await getPublishedNews();
+  const [news, settings] = await Promise.all([
+    getPublishedNews(),
+    getSiteSettings(),
+  ]);
 
   const withImages = news.filter((item) => item.image_url);
   const featured = withImages.filter((item) => item.featured_in_carousel);
@@ -38,6 +58,20 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 flex flex-col gap-10">
+      <h1 className="sr-only">{settings.school_name} — نشرة الأخبار الرسمية</h1>
+
+      <nav aria-label="اختصارات سريعة" className="flex flex-wrap gap-2">
+        {CATEGORY_LIST.map((cat) => (
+          <Link
+            key={cat.key}
+            href={`/category/${cat.key}`}
+            className="flex items-center min-h-11 rounded-full border border-ink/15 bg-white px-4 font-utility text-sm text-ink hover:border-maroon hover:text-maroon transition-colors"
+          >
+            {cat.label}
+          </Link>
+        ))}
+      </nav>
+
       {carouselItems.length > 0 ? (
         <HeroCarousel items={carouselItems} />
       ) : news.length === 0 ? (

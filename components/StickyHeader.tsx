@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { SiteSettings } from "@/lib/types";
 import MastheadNav from "./MastheadNav";
+import NavDrawer from "./NavDrawer";
 
 export default function StickyHeader({ settings }: { settings: SiteSettings }) {
   const [visible, setVisible] = useState(false);
@@ -27,11 +28,14 @@ export default function StickyHeader({ settings }: { settings: SiteSettings }) {
     <>
       <div ref={sentinelRef} aria-hidden="true" />
       <div
+        inert={!visible}
+        aria-hidden={!visible}
         className={`fixed top-0 inset-x-0 z-50 bg-ink text-paper shadow-md transition-transform duration-300 ${
           visible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
         <div className="mx-auto max-w-6xl px-4 py-2 flex items-center justify-between gap-4">
+          <NavDrawer />
           <MastheadNav compact />
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <span className="font-display text-lg leading-none">

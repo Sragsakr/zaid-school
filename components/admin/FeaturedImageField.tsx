@@ -26,7 +26,9 @@ export default function FeaturedImageField({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="font-utility text-sm text-ink/70">الصورة الرئيسية</span>
+      <span className="font-utility text-sm text-ink/70">
+        الصورة الرئيسية <span className="text-maroon">*</span>
+      </span>
 
       {imageUrl ? (
         <div className="relative w-full max-w-sm aspect-video rounded-md overflow-hidden border border-ink/10 group">

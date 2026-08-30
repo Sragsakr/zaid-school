@@ -89,6 +89,12 @@ export default function NewsForm({ initial, initialGallery = [] }: NewsFormProps
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (!imageUrl && !imageFile) {
+      setError("يجب إضافة صورة رئيسية قبل الحفظ.");
+      return;
+    }
+
     setSaving(true);
 
     const supabase = createClient();

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { NewsItem } from "@/lib/types";
 import { formatRelativeArabic } from "@/lib/format-date";
 import CategoryTag from "./CategoryTag";
+import SafeImage from "./SafeImage";
 
 export default function NewsCard({ item }: { item: NewsItem }) {
   return (
@@ -10,7 +10,7 @@ export default function NewsCard({ item }: { item: NewsItem }) {
       <Link href={`/news/${item.slug}`} className="flex flex-col h-full">
         {item.image_url ? (
           <div className="relative w-full aspect-video bg-ink/5">
-            <Image
+            <SafeImage
               src={item.image_url}
               alt={item.title}
               fill

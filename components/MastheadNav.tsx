@@ -21,7 +21,7 @@ export default function MastheadNav({
 
   if (compact) {
     return (
-      <nav className="flex flex-wrap items-center gap-1 font-utility text-sm">
+      <nav className="hidden sm:flex flex-wrap items-center gap-1 font-utility text-sm">
         {links.map((link) => {
           const isActive =
             link.href === "/" ? pathname === "/" : pathname === link.href;
@@ -31,7 +31,7 @@ export default function MastheadNav({
               key={link.href}
               href={link.href}
               aria-current={isActive ? "page" : undefined}
-              className={`rounded-full px-3 py-1 transition-colors ${
+              className={`flex items-center rounded-full px-3 min-h-11 transition-colors ${
                 isActive ? "bg-gold text-ink font-semibold" : "hover:text-gold"
               }`}
             >
@@ -44,7 +44,7 @@ export default function MastheadNav({
   }
 
   return (
-    <nav className="mt-2 flex flex-wrap justify-center gap-1 rounded-full bg-ink/70 backdrop-blur-sm px-2 py-2 font-utility text-sm">
+    <nav className="hidden sm:flex mt-2 flex-wrap justify-center gap-1 rounded-full bg-ink/70 backdrop-blur-sm px-2 py-1 font-utility text-sm">
       {links.map((link) => {
         const isActive =
           link.href === "/" ? pathname === "/" : pathname === link.href;
@@ -54,7 +54,7 @@ export default function MastheadNav({
             key={link.href}
             href={link.href}
             aria-current={isActive ? "page" : undefined}
-            className={`rounded-full px-3 py-1 transition-colors ${
+            className={`flex items-center rounded-full px-3 min-h-11 transition-colors ${
               isActive ? "bg-gold text-ink font-semibold" : "hover:text-gold"
             }`}
           >

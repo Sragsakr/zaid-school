@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { NewsItem } from "@/lib/types";
 import { formatRelativeArabic } from "@/lib/format-date";
 import CategoryTag from "./CategoryTag";
+import SafeImage from "./SafeImage";
 
 export default function CompactNewsItem({ item }: { item: NewsItem }) {
   return (
@@ -12,7 +12,7 @@ export default function CompactNewsItem({ item }: { item: NewsItem }) {
     >
       <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-md overflow-hidden bg-ink/5 border border-ink/10">
         {item.image_url ? (
-          <Image
+          <SafeImage
             src={item.image_url}
             alt={item.title}
             fill

@@ -4,37 +4,40 @@ import type { SiteSettings } from "@/lib/types";
 import { issueLine } from "@/lib/format-date";
 import MastheadNav from "./MastheadNav";
 import StickyHeader from "./StickyHeader";
+import NavDrawer from "./NavDrawer";
 
 export default function Masthead({ settings }: { settings: SiteSettings }) {
   return (
     <header className="bg-ink text-paper">
       {settings.logo_url ? (
-        <Link href="/" className="block relative w-full">
+        <Link
+          href="/"
+          className="block relative w-full h-[140px] sm:h-[180px] md:h-[260px] lg:h-[320px] bg-ink"
+        >
           <Image
             src={settings.logo_url}
             alt={settings.school_name}
-            width={1600}
-            height={900}
+            fill
             priority
             sizes="100vw"
-            className="w-full h-auto"
+            className="object-contain"
           />
         </Link>
       ) : null}
 
       <div className="mx-auto max-w-6xl px-4 py-4 flex flex-col items-center gap-2 text-center">
-        {!settings.logo_url ? (
-          <Link href="/">
-            <h1 className="font-display text-3xl sm:text-4xl leading-tight">
-              {settings.school_name}
-            </h1>
-          </Link>
-        ) : null}
+        <Link href="/" className="font-display text-2xl sm:text-3xl leading-tight">
+          {settings.school_name}
+        </Link>
         <p className="font-utility text-sm text-gold">
           نشرة الأخبار الرسمية للمدرسة
         </p>
         <p className="font-utility text-xs text-paper/70">{issueLine()}</p>
         <MastheadNav />
+
+        <div className="sm:hidden self-end -mt-1">
+          <NavDrawer />
+        </div>
       </div>
 
       <StickyHeader settings={settings} />

@@ -2,15 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import type { NewsItem } from "@/lib/types";
 import { formatRelativeArabic } from "@/lib/format-date";
 import CategoryTag from "./CategoryTag";
+import SafeImage from "./SafeImage";
 
 const AUTOPLAY_MS = 6000;
 
 export default function HeroCarousel({ items }: { items: NewsItem[] }) {
   const [index, setIndex] = useState(0);
+  const [playing, setPlaying] = useState(true);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const goTo = useCallback(
@@ -24,7 +25,7 @@ export default function HeroCarousel({ items }: { items: NewsItem[] }) {
   const prev = useCallback(() => goTo(index - 1), [goTo, index]);
 
   useEffect(() => {
-    if (items.length <= 1) return;
+    if (items.length <= 1 || !playing) return;
 
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
@@ -38,14 +39,17 @@ export default function HeroCarousel({ items }: { items: NewsItem[] }) {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [items.length]);
+  }, [items.length, playing]);
 
   if (items.length === 0) return null;
 
-  function pause() {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      prev();
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      next();
     }
   }
 
@@ -54,7 +58,11 @@ export default function HeroCarousel({ items }: { items: NewsItem[] }) {
       aria-roledescription="carousel"
       aria-label="أحدث الأخبار"
       className="relative w-full overflow-hidden rounded-lg bg-ink"
-      onMouseEnter={pause}
+      onMouseEnter={() => setPlaying(false)}
+      onMouseLeave={() => setPlaying(true)}
+      onFocus={() => setPlaying(false)}
+      onBlur={() => setPlaying(true)}
+      onKeyDown={handleKeyDown}
     >
       <div className="relative w-full aspect-[16/9] sm:aspect-[21/9]">
         {items.map((item, i) => (
@@ -62,6 +70,7 @@ export default function HeroCarousel({ items }: { items: NewsItem[] }) {
             key={item.id}
             href={`/news/${item.slug}`}
             aria-hidden={i !== index}
+            aria-label={`${item.title} — الخبر ${i + 1} من ${items.length}`}
             tabIndex={i === index ? 0 : -1}
             className={`absolute inset-0 transition-opacity duration-700 ${
               i === index
@@ -70,7 +79,7 @@ export default function HeroCarousel({ items }: { items: NewsItem[] }) {
             }`}
           >
             {item.image_url ? (
-              <Image
+              <SafeImage
                 src={item.image_url}
                 alt={item.title}
                 fill
@@ -104,7 +113,7 @@ export default function HeroCarousel({ items }: { items: NewsItem[] }) {
             type="button"
             onClick={prev}
             aria-label="الخبر السابق"
-            className="absolute top-1/2 -translate-y-1/2 right-3 bg-ink/50 hover:bg-ink/70 text-paper rounded-full w-9 h-9 flex items-center justify-center transition-colors"
+            className="absolute top-1/2 -translate-y-1/2 right-2 bg-ink/50 hover:bg-ink/70 text-paper rounded-full w-11 h-11 flex items-center justify-center transition-colors text-xl"
           >
             ‹
           </button>
@@ -112,23 +121,44 @@ export default function HeroCarousel({ items }: { items: NewsItem[] }) {
             type="button"
             onClick={next}
             aria-label="الخبر التالي"
-            className="absolute top-1/2 -translate-y-1/2 left-3 bg-ink/50 hover:bg-ink/70 text-paper rounded-full w-9 h-9 flex items-center justify-center transition-colors"
+            className="absolute top-1/2 -translate-y-1/2 left-2 bg-ink/50 hover:bg-ink/70 text-paper rounded-full w-11 h-11 flex items-center justify-center transition-colors text-xl"
           >
             ›
           </button>
 
-          <div className="absolute bottom-3 inset-x-0 flex justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPlaying((p) => !p)}
+            aria-label={playing ? "إيقاف التشغيل التلقائي" : "تشغيل تلقائي"}
+            aria-pressed={!playing}
+            className="absolute top-2 left-2 bg-ink/50 hover:bg-ink/70 text-paper rounded-full w-11 h-11 flex items-center justify-center transition-colors text-sm"
+          >
+            {playing ? "⏸" : "▶"}
+          </button>
+
+          <div
+            className="absolute bottom-3 inset-x-0 flex justify-center gap-1"
+            role="tablist"
+            aria-label="اختيار الخبر"
+          >
             {items.map((item, i) => (
               <button
                 key={item.id}
                 type="button"
+                role="tab"
                 onClick={() => goTo(i)}
-                aria-label={`الانتقال إلى الخبر ${i + 1}`}
+                aria-label={`الانتقال إلى الخبر ${i + 1} من ${items.length}`}
+                aria-selected={i === index}
                 aria-current={i === index}
-                className={`h-2 rounded-full transition-all ${
-                  i === index ? "w-6 bg-gold" : "w-2 bg-paper/50"
-                }`}
-              />
+                className="w-11 h-11 flex items-center justify-center"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`block h-2 rounded-full transition-all ${
+                    i === index ? "w-6 bg-gold" : "w-2 bg-paper/50"
+                  }`}
+                />
+              </button>
             ))}
           </div>
         </>

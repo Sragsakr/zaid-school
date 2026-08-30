@@ -1,16 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 interface ShareButtonProps {
   url: string;
   title: string;
 }
 
+function subscribe() {
+  return () => {};
+}
+
+function getNativeShareSnapshot() {
+  return typeof navigator.share === "function";
+}
+
+function getNativeShareServerSnapshot() {
+  return false;
+}
+
 export default function ShareButton({ url, title }: ShareButtonProps) {
-  const [canNativeShare] = useState(
-    () =>
-      typeof navigator !== "undefined" && typeof navigator.share === "function"
+  const canNativeShare = useSyncExternalStore(
+    subscribe,
+    getNativeShareSnapshot,
+    getNativeShareServerSnapshot
   );
   const [copied, setCopied] = useState(false);
 

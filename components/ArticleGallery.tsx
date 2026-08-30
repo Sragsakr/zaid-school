@@ -1,5 +1,5 @@
-import Image from "next/image";
 import type { NewsImage } from "@/lib/types";
+import SafeImage from "./SafeImage";
 
 export default function ArticleGallery({ images }: { images: NewsImage[] }) {
   if (images.length === 0) return null;
@@ -13,7 +13,7 @@ export default function ArticleGallery({ images }: { images: NewsImage[] }) {
             key={image.id}
             className="relative aspect-square rounded-md overflow-hidden bg-ink/5 border border-ink/10"
           >
-            <Image
+            <SafeImage
               src={image.image_url}
               alt=""
               fill
