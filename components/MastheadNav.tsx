@@ -17,6 +17,7 @@ export default function MastheadNav({
       href: `/category/${cat.key}`,
       label: cat.label,
     })),
+    { href: "/search", label: "بحث" },
   ];
 
   if (compact) {

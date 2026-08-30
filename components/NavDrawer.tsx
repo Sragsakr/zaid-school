@@ -11,6 +11,7 @@ const LINKS = [
     href: `/category/${cat.key}`,
     label: cat.label,
   })),
+  { href: "/search", label: "بحث في الأخبار" },
 ];
 
 export default function NavDrawer() {

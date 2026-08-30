@@ -34,8 +34,8 @@ export default function HeroCarousel({ items }: { items: NewsItem[] }) {
     <section aria-roledescription="carousel" aria-label="أبرز أخبار المدرسة" className="relative overflow-hidden rounded-2xl bg-ink shadow-xl" onMouseEnter={() => setPlaying(false)} onMouseLeave={() => setPlaying(false)} onFocus={() => setPlaying(false)} onKeyDown={handleKeyDown}>
       <div className="relative aspect-[4/3] w-full sm:aspect-[21/9]">
         {items.map((item, itemIndex) => (
-          <Link key={item.id} href={`/news/${item.slug}`} aria-hidden={itemIndex !== index} aria-label={`${item.title} — الخبر ${itemIndex + 1} من ${items.length}`} tabIndex={itemIndex === index ? 0 : -1} className={`absolute inset-0 transition-opacity duration-500 ${itemIndex === index ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}>
-            {item.image_url ? <SafeImage src={item.image_url} alt={item.title} fill sizes="100vw" className="object-cover" priority={itemIndex === 0} /> : <div className="absolute inset-0 bg-ink" />}
+          <Link key={item.id} href={`/news/${item.slug}`} aria-hidden={itemIndex !== index} tabIndex={itemIndex === index ? 0 : -1} className={`absolute inset-0 transition-opacity duration-500 ${itemIndex === index ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}>
+            {item.image_url ? <SafeImage src={item.image_url} alt={item.title} fill sizes="(min-width: 1152px) 1152px, calc(100vw - 2rem)" className="object-cover" priority={itemIndex === 0} /> : <div className="absolute inset-0 bg-ink" />}
             <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/35 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 flex max-w-3xl flex-col gap-3 p-5 sm:p-9">
               <CategoryTag category={item.category} />

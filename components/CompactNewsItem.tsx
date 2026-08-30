@@ -23,9 +23,9 @@ export default function CompactNewsItem({ item }: { item: NewsItem }) {
       </div>
       <div className="flex flex-col gap-1 min-w-0">
         <CategoryTag category={item.category} />
-        <h4 className="font-body font-medium text-ink leading-snug line-clamp-2 group-hover:text-maroon transition-colors">
+        <h3 className="font-body font-medium text-ink leading-snug line-clamp-2 group-hover:text-maroon transition-colors">
           {item.title}
-        </h4>
+        </h3>
         <time
           dateTime={item.created_at}
           className="font-utility text-xs text-ink/50"

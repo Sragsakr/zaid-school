@@ -81,6 +81,15 @@ export async function getNewsByCategory(
   return data ?? [];
 }
 
+export async function searchPublishedNews(query: string): Promise<NewsItem[]> {
+  const normalizedQuery = query.trim().toLocaleLowerCase("ar");
+  if (!normalizedQuery) return [];
+  const news = await getPublishedNews();
+  return news.filter((item) =>
+    `${item.title} ${item.excerpt}`.toLocaleLowerCase("ar").includes(normalizedQuery)
+  );
+}
+
 export async function getAllNewsForAdmin(): Promise<NewsItem[]> {
   const supabase = await createClient();
   const { data } = await supabase
