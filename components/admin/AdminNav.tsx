@@ -7,6 +7,7 @@ import LogoutButton from "./LogoutButton";
 const NAV_LINKS = [
   { href: "/admin", label: "الأخبار" },
   { href: "/admin/settings", label: "إعدادات الموقع" },
+  { href: "/admin/users", label: "الفريق والصلاحيات" },
 ];
 
 export default function AdminNav() {

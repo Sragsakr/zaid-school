@@ -52,6 +52,7 @@ export default function NewsForm({ initial, initialGallery = [] }: NewsFormProps
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [pinned, setPinned] = useState(initial?.pinned ?? false);
   const [priority, setPriority] = useState(initial?.priority ?? 0);
+  const [publishAt, setPublishAt] = useState(toDateTimeLocal(initial?.publish_at));
   const [eventAt, setEventAt] = useState(toDateTimeLocal(initial?.event_at));
   const [location, setLocation] = useState(initial?.location ?? "");
   const [audience, setAudience] = useState(initial?.audience ?? "");
@@ -145,6 +146,7 @@ export default function NewsForm({ initial, initialGallery = [] }: NewsFormProps
         featured_in_carousel: featuredInCarousel,
         pinned,
         priority,
+        publish_at: publishAt ? new Date(publishAt).toISOString() : null,
         event_at: eventAt ? new Date(eventAt).toISOString() : null,
         location: location.trim() || null,
         audience: audience.trim() || null,
@@ -290,6 +292,11 @@ export default function NewsForm({ initial, initialGallery = [] }: NewsFormProps
         <div className="flex flex-col gap-1">
           <label htmlFor="audience" className="font-utility text-sm text-ink/70">الجمهور المستهدف</label>
           <input id="audience" value={audience} onChange={(event) => setAudience(event.target.value)} placeholder="مثال: أولياء الأمور" className="min-h-11 rounded-md border border-ink/20 px-3 font-body" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="publish-at" className="font-utility text-sm text-ink/70">موعد النشر الاختياري</label>
+          <input id="publish-at" type="datetime-local" value={publishAt} onChange={(event) => setPublishAt(event.target.value)} className="min-h-11 rounded-md border border-ink/20 px-3 font-body" />
+          <p className="font-utility text-xs text-ink/50">اتركه فارغًا للنشر فورًا عند تفعيل «منشور».</p>
         </div>
         <label className="flex items-center gap-2 font-utility text-sm sm:col-span-2">
           <input type="checkbox" checked={pinned} onChange={(event) => setPinned(event.target.checked)} className="h-4 w-4" />

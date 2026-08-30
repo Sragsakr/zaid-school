@@ -18,6 +18,7 @@ export type NewsItem = {
   audience: string | null;
   cta_label: string | null;
   cta_url: string | null;
+  publish_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -47,6 +48,16 @@ export type NewsImage = {
   image_url: string;
   sort_order: number;
   created_at: string;
+};
+
+export type AdminRole = "editor" | "publisher" | "super_admin";
+
+export type AdminProfile = {
+  id: string;
+  email: string | null;
+  role: AdminRole;
+  created_at: string;
+  updated_at: string;
 };
 
 export type Database = {
@@ -79,9 +90,20 @@ export type Database = {
         Update: Partial<NewsImage>;
         Relationships: [];
       };
+      admin_profiles: {
+        Row: AdminProfile;
+        Insert: Pick<AdminProfile, "id" | "role"> & Partial<AdminProfile>;
+        Update: Partial<AdminProfile>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      current_admin_role: {
+        Args: Record<PropertyKey, never>;
+        Returns: AdminRole | null;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

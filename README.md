@@ -59,6 +59,16 @@ supabase/migrations/20260830_remove_demo_content.sql
 
 ملف الحذف يستهدف الـ slugs التي تبدأ بـ `demo-` فقط، وتحذف صور معارضها تلقائيًا عبر `ON DELETE CASCADE`.
 
+### أمان الإدارة وجدولة النشر
+
+طبّق migration الأدوار والجدولة قبل نشر الواجهات المرتبطة به:
+
+```text
+supabase/migrations/20260830_secure_admin_and_scheduling.sql
+```
+
+ينقل الحسابات الحالية إلى `super_admin` لمنع فقدان الوصول، ويضيف أدوار `editor` و`publisher`، ومعاينة الأخبار، والنشر المجدول، وسياسات RLS وStorage محددة حسب الدور.
+
 ## 3) إنشاء حساب المسؤول (Admin)
 
 من `Authentication → Users` في لوحة Supabase، أضف مستخدمًا يدويًا (بريد إلكتروني + كلمة مرور). هذا هو الحساب الذي سيسجل به المسؤول الدخول على `/admin/login`.
