@@ -9,6 +9,13 @@ export function formatArabicDate(iso: string): string {
   return ARABIC_DATE.format(new Date(iso));
 }
 
+export function formatArabicDateTime(iso: string): string {
+  return new Intl.DateTimeFormat("ar-EG", {
+    dateStyle: "long",
+    timeStyle: "short",
+  }).format(new Date(iso));
+}
+
 export function formatRelativeArabic(iso: string): string {
   const date = new Date(iso);
   const diffMs = date.getTime() - Date.now();

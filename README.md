@@ -33,6 +33,16 @@ supabase link --project-ref your-project-ref
 supabase db push
 ```
 
+### تحديث قاعدة بيانات مشروع قائم
+
+قبل نشر نسخة الكود التي تضيف أولوية الأخبار وبيانات الفعاليات وCTA، نفّذ الملف التالي مرة واحدة من Supabase SQL Editor:
+
+```text
+supabase/migrations/20260830_extend_news_content_model.sql
+```
+
+الـ migration إضافي وآمن لإعادة التشغيل (`if not exists`) ولا يحذف أي بيانات حالية. يجب تطبيقه قبل نشر الكود المرتبط به حتى يظل حفظ الأخبار من لوحة الإدارة يعمل.
+
 ## 3) إنشاء حساب المسؤول (Admin)
 
 من `Authentication → Users` في لوحة Supabase، أضف مستخدمًا يدويًا (بريد إلكتروني + كلمة مرور). هذا هو الحساب الذي سيسجل به المسؤول الدخول على `/admin/login`.

@@ -14,7 +14,7 @@ export default function CompactNewsItem({ item }: { item: NewsItem }) {
         {item.image_url ? (
           <SafeImage
             src={item.image_url}
-            alt={item.title}
+            alt={item.image_alt || item.title}
             fill
             sizes="96px"
             className="object-cover"

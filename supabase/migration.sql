@@ -17,8 +17,16 @@ create table if not exists news (
   content text not null,
   category text not null check (category in ('school','events','announcements','contests','results')),
   image_url text,
+  image_alt text,
   published boolean not null default true,
   featured_in_carousel boolean not null default false,
+  pinned boolean not null default false,
+  priority smallint not null default 0 check (priority between 0 and 3),
+  event_at timestamptz,
+  location text,
+  audience text,
+  cta_label text,
+  cta_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -28,6 +36,9 @@ create index if not exists news_published_created_at_idx
 
 create index if not exists news_category_idx
   on news (category);
+
+create index if not exists news_editorial_order_idx
+  on news (published, pinned desc, priority desc, created_at desc);
 
 alter table news enable row level security;
 

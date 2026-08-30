@@ -217,7 +217,13 @@ Migration additive: `priority`, `pinned`, `event_at`, `location`, `audience`, `c
 - إضافة gallery lightbox accessible.
 - تحسين footer/about/admin shell/admin table/login.
 
-لم يتم تنفيذ migration لحقول جديدة أو تغيير صلاحيات Supabase؛ ذلك يحتاج بيانات تشغيلية مؤكدة وسياسة صلاحيات منفصلة.
+تم تجهيز migration إضافي لحقول الأولوية والتثبيت والفعاليات والجمهور وCTA و`image_alt` في `supabase/migrations/20260830_extend_news_content_model.sql`، مع تحديث نموذج الإدارة والعرض العام. تطبيقه على Supabase ما زال مطلوبًا قبل نشر الحزمة لعدم توفر DB/service-role credentials محليًا. لم يتم تغيير صلاحيات Supabase؛ ذلك يحتاج سياسة أدوار منفصلة.
+
+نتائج Lighthouse على production build المحلي:
+
+- Home: Performance 96، Accessibility 100، Best Practices 96، SEO 100.
+- Article: Performance 97، Accessibility 100، Best Practices 96، SEO 100.
+- Search: Performance 76، Accessibility 100، Best Practices 100؛ SEO 66 متوقع لأن صفحة النتائج `noindex`.
 
 ## Recommended next workflow
 

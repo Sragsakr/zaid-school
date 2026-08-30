@@ -8,8 +8,16 @@ export type NewsItem = {
   content: string;
   category: CategoryKey;
   image_url: string | null;
+  image_alt: string | null;
   published: boolean;
   featured_in_carousel: boolean;
+  pinned: boolean;
+  priority: number;
+  event_at: string | null;
+  location: string | null;
+  audience: string | null;
+  cta_label: string | null;
+  cta_url: string | null;
   created_at: string;
   updated_at: string;
 };

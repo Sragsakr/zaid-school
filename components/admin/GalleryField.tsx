@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import type { NewsImage } from "@/lib/types";
+import { NEWS_IMAGE_ACCEPT, newsImageValidationError } from "@/lib/news-image";
 
 interface PendingImage {
   key: string;
@@ -26,6 +28,14 @@ export default function GalleryField({
   onRemovePending,
   deletingId,
 }: GalleryFieldProps) {
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  function addValidFiles(files: File[]) {
+    const firstError = files.map(newsImageValidationError).find(Boolean);
+    setValidationError(firstError ?? null);
+    if (!firstError) onAddFiles(files);
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <span className="font-utility text-sm text-ink/70">
@@ -80,17 +90,18 @@ export default function GalleryField({
 
       <input
         type="file"
-        accept="image/*"
+        accept={NEWS_IMAGE_ACCEPT}
         multiple
         onChange={(e) => {
           const files = Array.from(e.target.files ?? []);
-          if (files.length > 0) onAddFiles(files);
+          if (files.length > 0) addValidFiles(files);
           e.target.value = "";
         }}
         className="font-utility text-sm"
       />
+      {validationError ? <p className="font-utility text-xs text-maroon" role="alert">{validationError}</p> : null}
       <p className="font-utility text-xs text-ink/50">
-        يمكن اختيار عدة صور مرة واحدة.
+        يمكن اختيار عدة صور JPG أو PNG أو WebP، بحد أقصى 8 ميجابايت للصورة.
       </p>
     </div>
   );

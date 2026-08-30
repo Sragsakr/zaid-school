@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
+import { NEWS_IMAGE_ACCEPT, newsImageValidationError } from "@/lib/news-image";
 
 interface FeaturedImageFieldProps {
   imageUrl: string;
@@ -16,12 +17,14 @@ export default function FeaturedImageField({
 }: FeaturedImageFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   function handleFiles(files: FileList | null) {
     const file = files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      onFileSelected(file);
-    }
+    if (!file) return;
+    const error = newsImageValidationError(file);
+    setValidationError(error);
+    if (!error) onFileSelected(file);
   }
 
   return (
@@ -78,7 +81,7 @@ export default function FeaturedImageField({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept={NEWS_IMAGE_ACCEPT}
         onChange={(e) => {
           handleFiles(e.target.files);
           e.target.value = "";
@@ -86,8 +89,9 @@ export default function FeaturedImageField({
         className="hidden"
       />
 
+      {validationError ? <p className="font-utility text-xs text-maroon" role="alert">{validationError}</p> : null}
       <p className="font-utility text-xs text-ink/50">
-        هذه الصورة تظهر في بطاقة الخبر والصفحة الرئيسية ومعاينات المشاركة.
+        JPG أو PNG أو WebP، بحد أقصى 8 ميجابايت. تظهر في بطاقة الخبر ومعاينات المشاركة.
       </p>
     </div>
   );

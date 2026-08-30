@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { CATEGORY_LIST } from "@/lib/categories";
 import { slugify } from "@/lib/slug";
 import type { NewsImage, NewsItem } from "@/lib/types";
+import { safeHttpUrl } from "@/lib/safe-url";
 import {
   addNewsImages,
   deleteNewsImage,
@@ -25,6 +26,13 @@ interface PendingImage {
   previewUrl: string;
 }
 
+function toDateTimeLocal(value?: string | null) {
+  if (!value) return "";
+  const date = new Date(value);
+  const offsetMs = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
+}
+
 export default function NewsForm({ initial, initialGallery = [] }: NewsFormProps) {
   const router = useRouter();
   const isEdit = Boolean(initial);
@@ -40,7 +48,15 @@ export default function NewsForm({ initial, initialGallery = [] }: NewsFormProps
     initial?.featured_in_carousel ?? false
   );
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
+  const [imageAlt, setImageAlt] = useState(initial?.image_alt ?? "");
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [pinned, setPinned] = useState(initial?.pinned ?? false);
+  const [priority, setPriority] = useState(initial?.priority ?? 0);
+  const [eventAt, setEventAt] = useState(toDateTimeLocal(initial?.event_at));
+  const [location, setLocation] = useState(initial?.location ?? "");
+  const [audience, setAudience] = useState(initial?.audience ?? "");
+  const [ctaLabel, setCtaLabel] = useState(initial?.cta_label ?? "");
+  const [ctaUrl, setCtaUrl] = useState(initial?.cta_url ?? "");
 
   const [existingGallery, setExistingGallery] =
     useState<NewsImage[]>(initialGallery);
@@ -95,6 +111,16 @@ export default function NewsForm({ initial, initialGallery = [] }: NewsFormProps
       return;
     }
 
+    if (Boolean(ctaLabel.trim()) !== Boolean(ctaUrl.trim())) {
+      setError("أضف نص زر الإجراء والرابط معًا، أو اتركهما فارغين.");
+      return;
+    }
+
+    if (ctaUrl.trim() && !safeHttpUrl(ctaUrl.trim())) {
+      setError("رابط الإجراء يجب أن يبدأ بـ http:// أو https://.");
+      return;
+    }
+
     setSaving(true);
 
     const supabase = createClient();
@@ -114,8 +140,16 @@ export default function NewsForm({ initial, initialGallery = [] }: NewsFormProps
         content,
         category,
         image_url: finalImageUrl || null,
+        image_alt: imageAlt.trim() || null,
         published,
         featured_in_carousel: featuredInCarousel,
+        pinned,
+        priority,
+        event_at: eventAt ? new Date(eventAt).toISOString() : null,
+        location: location.trim() || null,
+        audience: audience.trim() || null,
+        cta_label: ctaLabel.trim() || null,
+        cta_url: ctaUrl.trim() || null,
       };
 
       let newsId = initial?.id;
@@ -163,7 +197,7 @@ export default function NewsForm({ initial, initialGallery = [] }: NewsFormProps
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5 max-w-2xl">
+    <form onSubmit={handleSubmit} className="flex max-w-3xl flex-col gap-6">
       <div className="flex flex-col gap-1">
         <label htmlFor="title" className="font-utility text-sm text-ink/70">
           العنوان
@@ -242,6 +276,51 @@ export default function NewsForm({ initial, initialGallery = [] }: NewsFormProps
         </select>
       </div>
 
+      <fieldset className="grid gap-4 rounded-xl border border-ink/10 bg-white p-5 sm:grid-cols-2">
+        <legend className="px-2 font-display text-xl text-ink">بيانات النشر</legend>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="priority" className="font-utility text-sm text-ink/70">الأولوية</label>
+          <select id="priority" value={priority} onChange={(event) => setPriority(Number(event.target.value))} className="min-h-11 rounded-md border border-ink/20 px-3 font-body">
+            <option value={0}>عادية</option>
+            <option value={1}>مهمة</option>
+            <option value={2}>عاجلة</option>
+            <option value={3}>قصوى</option>
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="audience" className="font-utility text-sm text-ink/70">الجمهور المستهدف</label>
+          <input id="audience" value={audience} onChange={(event) => setAudience(event.target.value)} placeholder="مثال: أولياء الأمور" className="min-h-11 rounded-md border border-ink/20 px-3 font-body" />
+        </div>
+        <label className="flex items-center gap-2 font-utility text-sm sm:col-span-2">
+          <input type="checkbox" checked={pinned} onChange={(event) => setPinned(event.target.checked)} className="h-4 w-4" />
+          تثبيت الخبر ضمن المحتوى المهم
+        </label>
+      </fieldset>
+
+      <fieldset className="grid gap-4 rounded-xl border border-ink/10 bg-white p-5 sm:grid-cols-2">
+        <legend className="px-2 font-display text-xl text-ink">تفاصيل الفعالية أو الموعد</legend>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="event-at" className="font-utility text-sm text-ink/70">التاريخ والوقت</label>
+          <input id="event-at" type="datetime-local" value={eventAt} onChange={(event) => setEventAt(event.target.value)} className="min-h-11 rounded-md border border-ink/20 px-3 font-body" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="location" className="font-utility text-sm text-ink/70">المكان</label>
+          <input id="location" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="مثال: مسرح المدرسة" className="min-h-11 rounded-md border border-ink/20 px-3 font-body" />
+        </div>
+      </fieldset>
+
+      <fieldset className="grid gap-4 rounded-xl border border-ink/10 bg-white p-5 sm:grid-cols-2">
+        <legend className="px-2 font-display text-xl text-ink">رابط الإجراء</legend>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="cta-label" className="font-utility text-sm text-ink/70">نص الزر</label>
+          <input id="cta-label" value={ctaLabel} onChange={(event) => setCtaLabel(event.target.value)} placeholder="مثال: التسجيل الآن" className="min-h-11 rounded-md border border-ink/20 px-3 font-body" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="cta-url" className="font-utility text-sm text-ink/70">الرابط</label>
+          <input id="cta-url" type="url" dir="ltr" value={ctaUrl} onChange={(event) => setCtaUrl(event.target.value)} placeholder="https://" className="min-h-11 rounded-md border border-ink/20 px-3 text-left font-body" />
+        </div>
+      </fieldset>
+
       <FeaturedImageField
         imageUrl={imageUrl}
         onFileSelected={(file) => {
@@ -253,6 +332,12 @@ export default function NewsForm({ initial, initialGallery = [] }: NewsFormProps
           setImageUrl("");
         }}
       />
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="image-alt" className="font-utility text-sm text-ink/70">وصف الصورة لذوي الإعاقة البصرية</label>
+        <input id="image-alt" value={imageAlt} onChange={(event) => setImageAlt(event.target.value)} placeholder="صف ما يظهر في الصورة باختصار" className="min-h-11 rounded-md border border-ink/20 px-3 font-body" />
+        <p className="font-utility text-xs text-ink/50">اتركه فارغًا فقط إذا كانت الصورة زخرفية ولا تضيف معنى.</p>
+      </div>
 
       <GalleryField
         existingImages={existingGallery}

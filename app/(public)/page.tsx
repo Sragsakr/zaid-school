@@ -39,7 +39,10 @@ export default async function HomePage() {
   const featuredSide = sideNews.slice(0, FEATURED_SIDE_COUNT);
   const featuredIds = new Set([lead, ...featuredSide].filter(Boolean).map((item) => (item as NewsItem).id));
   const sectionedNews = remainingNews.filter((item) => !featuredIds.has(item.id));
-  const announcements = news.filter((item) => item.category === "announcements").slice(0, 3);
+  const announcements = [...news]
+    .filter((item) => item.category === "announcements")
+    .sort(compareEditorialPriority)
+    .slice(0, 3);
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-12 px-4 py-8 sm:py-10">
@@ -90,8 +93,14 @@ export default async function HomePage() {
   );
 }
 
+function compareEditorialPriority(first: NewsItem, second: NewsItem) {
+  const pinnedDifference = Number(second.pinned ?? false) - Number(first.pinned ?? false);
+  if (pinnedDifference !== 0) return pinnedDifference;
+  return (second.priority ?? 0) - (first.priority ?? 0);
+}
+
 function selectCarouselItems(news: NewsItem[]) {
-  const withImages = news.filter((item) => item.image_url);
+  const withImages = news.filter((item) => item.image_url).sort(compareEditorialPriority);
   const featured = withImages.filter((item) => item.featured_in_carousel);
   return (featured.length > 0 ? featured : withImages).slice(0, CAROUSEL_SIZE);
 }

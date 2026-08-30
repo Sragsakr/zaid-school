@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, NewsImage } from "@/lib/types";
+import { assertValidNewsImage } from "@/lib/news-image";
 
 export async function uploadNewsImages(
   supabase: SupabaseClient<Database>,
@@ -8,6 +9,7 @@ export async function uploadNewsImages(
   const urls: string[] = [];
 
   for (const file of files) {
+    assertValidNewsImage(file);
     const ext = file.name.split(".").pop();
     const path = `${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage

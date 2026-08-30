@@ -12,7 +12,7 @@ export default function NewsCard({ item }: { item: NewsItem }) {
           <div className="relative aspect-[16/10] w-full overflow-hidden bg-ink/5">
             <SafeImage
               src={item.image_url}
-              alt={item.title}
+              alt={item.image_alt || item.title}
               fill
               sizes="(min-width: 1280px) 30vw, (min-width: 640px) 45vw, 100vw"
               className="object-cover transition-transform duration-500 group-hover:scale-105"
