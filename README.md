@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# نشرة أخبار المدرسة
 
-## Getting Started
+موقع إخباري عام لمدرسة خاصة، مبني بـ Next.js (App Router) و Supabase، مع لوحة تحكم خاصة للإدارة غير التقنية لإضافة وتعديل وحذف الأخبار.
 
-First, run the development server:
+## المكدس التقني
+
+- **Next.js 16 (App Router, TypeScript)** — توليد ثابت + ISR لكل الصفحات العامة
+- **Supabase** — قاعدة بيانات Postgres، مصادقة (Auth)، وتخزين ملفات (Storage)
+- **Tailwind CSS v4**
+- **Vercel** كهدف نشر
+
+## 1) إنشاء مشروع Supabase
+
+1. أنشئ مشروعًا جديدًا على [supabase.com](https://supabase.com).
+2. من `Project Settings → API`، انسخ:
+   - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
+   - `anon public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - (اختياري) `service_role` key → `SUPABASE_SERVICE_ROLE_KEY`
+
+## 2) تشغيل الـ migration
+
+من `SQL Editor` في لوحة تحكم Supabase، الصق محتوى [`supabase/migration.sql`](supabase/migration.sql) بالكامل ثم نفّذه. هذا الملف ينشئ:
+
+- جدول `news` وسياسات RLS الخاصة به
+- جدول `site_settings` (صف واحد فقط) وسياسات RLS الخاصة به
+- حاويتي التخزين `news-images` و `site-assets` مع سياسات القراءة العامة والكتابة للمصادَقين فقط
+- بيانات أولية (٦ أخبار تجريبية) لتوزّع على كل التصنيفات
+
+بدلًا من ذلك، يمكن استخدام Supabase CLI:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+supabase link --project-ref your-project-ref
+supabase db push
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 3) إنشاء حساب المسؤول (Admin)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+من `Authentication → Users` في لوحة Supabase، أضف مستخدمًا يدويًا (بريد إلكتروني + كلمة مرور). هذا هو الحساب الذي سيسجل به المسؤول الدخول على `/admin/login`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+> ملاحظة: سياسات RLS في هذا المشروع تمنح صلاحية الكتابة الكاملة لأي مستخدم مُصادَق عليه (`auth.role() = 'authenticated'`). إن أردت تقييدها لمستخدمين محددين، عدّل السياسات في `supabase/migration.sql` لتتحقق من `auth.uid()` مقابل جدول مسؤولين مخصص.
 
-## Learn More
+## 4) متغيرات البيئة
 
-To learn more about Next.js, take a look at the following resources:
+انسخ `.env.example` إلى `.env.local` واملأ القيم:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cp .env.example .env.local
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 5) التشغيل محليًا
 
-## Deploy on Vercel
+```bash
+npm install
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+افتح [http://localhost:3000](http://localhost:3000) للموقع العام، و [http://localhost:3000/admin/login](http://localhost:3000/admin/login) للوحة التحكم.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 6) النشر على Vercel
+
+1. ادفع المشروع إلى مستودع Git (GitHub/GitLab/Bitbucket).
+2. من [vercel.com](https://vercel.com)، استورد المستودع.
+3. أضف نفس متغيرات البيئة من `.env.example` في إعدادات المشروع على Vercel (`Settings → Environment Variables`).
+4. اضبط `NEXT_PUBLIC_SITE_URL` على نطاق الإنتاج الفعلي (مطلوب لصحة `sitemap.xml` وعلامات Open Graph).
+5. انشر المشروع.
+
+## بنية المشروع
+
+```
+app/
+  (public)/            الصفحات العامة (الرئيسية، الأخبار، التصنيفات) — تشترك في القالب مع الترويسة والتذييل
+  admin/                لوحة التحكم المحمية (دخول، إدارة الأخبار، الإعدادات)
+  sitemap.ts            توليد خريطة الموقع ديناميكيًا من الأخبار المنشورة
+  robots.ts             السماح للزواحف بالموقع العام ومنعها من /admin
+lib/
+  categories.ts          تعريف التصنيفات الخمسة وألوانها
+  data.ts                دوال قراءة البيانات من Supabase (خوادم)
+  supabase/               عملاء Supabase (متصفح، خادم، middleware)
+components/
+  admin/                  مكونات لوحة التحكم (نماذج، تسجيل خروج، حذف)
+supabase/
+  migration.sql           مخطط قاعدة البيانات الكامل + RLS + التخزين + بيانات أولية
+```
+
+## ملاحظات SEO
+
+- كل صفحة عامة تُولّد ثابتًا مع `revalidate: 60` (ISR)، وتحتوي HTML الكامل من أول تحميل (بدون الاعتماد على JavaScript من جهة العميل).
+- `generateMetadata` في `/news/[slug]` ينتج عنوانًا ووصفًا وعلامات Open Graph حقيقية لكل خبر.
+- `app/sitemap.ts` يولّد خريطة موقع تشمل كل خبر منشور.
+- `app/robots.ts` يسمح بفهرسة الموقع العام ويمنع `/admin`.
+- صفحات `/admin/*` تحمل `robots: { index: false, follow: false }`.
