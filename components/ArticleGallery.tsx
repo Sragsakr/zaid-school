@@ -1,22 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { NewsImage } from "@/lib/types";
 import SafeImage from "./SafeImage";
 
 export default function ArticleGallery({ images }: { images: NewsImage[] }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const [selectedImage, setSelectedImage] = useState<NewsImage | null>(null);
 
   useEffect(() => {
     if (!selectedImage) return;
-    function closeOnEscape(event: KeyboardEvent) { if (event.key === "Escape") setSelectedImage(null); }
-    document.addEventListener("keydown", closeOnEscape);
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.open) dialog.showModal();
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", closeOnEscape); document.body.style.overflow = originalOverflow; };
+    return () => { document.body.style.overflow = originalOverflow; };
   }, [selectedImage]);
 
   if (images.length === 0) return null;
+
+  function closeDialog() {
+    dialogRef.current?.close();
+  }
 
   return (
     <section aria-labelledby="gallery-heading" className="mt-12">
@@ -28,14 +33,10 @@ export default function ArticleGallery({ images }: { images: NewsImage[] }) {
           </button>
         ))}
       </div>
-      {selectedImage ? (
-        <div role="dialog" aria-modal="true" aria-label="عرض الصورة" className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/90 p-4" onClick={() => setSelectedImage(null)}>
-          <button type="button" aria-label="إغلاق الصورة" onClick={() => setSelectedImage(null)} className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-paper text-2xl text-ink">×</button>
-          <div className="relative h-[80vh] w-full max-w-5xl" onClick={(event) => event.stopPropagation()}>
-            <SafeImage src={selectedImage.image_url} alt="صورة مكبرة من الخبر" fill sizes="90vw" className="object-contain" />
-          </div>
-        </div>
-      ) : null}
+      <dialog ref={dialogRef} onClose={() => setSelectedImage(null)} aria-label="عرض الصورة" onClick={(event) => { if (event.target === event.currentTarget) closeDialog(); }} className="fixed inset-0 m-auto h-full max-h-none w-full max-w-none bg-ink/95 p-4 backdrop:bg-ink/90">
+        <button type="button" aria-label="إغلاق الصورة" onClick={closeDialog} className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-paper text-2xl text-ink">×</button>
+        {selectedImage ? <div className="relative mx-auto h-full w-full max-w-5xl"><SafeImage src={selectedImage.image_url} alt="صورة مكبرة من الخبر" fill sizes="90vw" className="object-contain" /></div> : null}
+      </dialog>
     </section>
   );
 }
