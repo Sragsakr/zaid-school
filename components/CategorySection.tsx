@@ -2,13 +2,7 @@ import Link from "next/link";
 import type { NewsItem } from "@/lib/types";
 import { getCategoryInfo } from "@/lib/categories";
 import NewsCard from "./NewsCard";
-
-const ACCENT_BORDER: Record<string, string> = {
-  navy: "border-ink",
-  gold: "border-gold",
-  maroon: "border-maroon",
-  teal: "border-teal",
-};
+import SectionHeading from "./SectionHeading";
 
 export default function CategorySection({
   category,
@@ -21,23 +15,14 @@ export default function CategorySection({
   if (!info || items.length === 0) return null;
 
   return (
-    <section className="flex flex-col gap-4">
-      <div
-        className={`flex items-center justify-between border-b-2 pb-2 ${ACCENT_BORDER[info.accent]}`}
-      >
-        <h2 className="font-display text-2xl text-ink">{info.label}</h2>
-        <Link
-          href={`/category/${info.key}`}
-          className="font-utility text-sm text-ink/60 hover:text-maroon transition-colors"
-        >
-          عرض الكل ←
-        </Link>
+    <section className="flex flex-col gap-5">
+      <SectionHeading title={info.label} href={`/category/${info.key}`} />
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {items.map((item) => <NewsCard key={item.id} item={item} />)}
       </div>
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {items.map((item) => (
-          <NewsCard key={item.id} item={item} />
-        ))}
-      </div>
+      <Link href={`/category/${info.key}`} className="self-start rounded-md px-2 py-2 font-utility text-sm text-ink/60 hover:bg-ink/5 hover:text-maroon">
+        استكشف كل {info.label} ←
+      </Link>
     </section>
   );
 }

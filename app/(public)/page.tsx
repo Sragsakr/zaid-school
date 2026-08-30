@@ -6,14 +6,15 @@ import HeroCarousel from "@/components/HeroCarousel";
 import NewsCard from "@/components/NewsCard";
 import CompactNewsItem from "@/components/CompactNewsItem";
 import CategorySection from "@/components/CategorySection";
+import SectionHeading from "@/components/SectionHeading";
+import ServiceLinks from "@/components/ServiceLinks";
 import { CATEGORY_LIST } from "@/lib/categories";
 import type { NewsItem } from "@/lib/types";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const revalidate = 60;
-
-const CAROUSEL_SIZE = 5;
-const FEATURED_SIDE_COUNT = 4;
+const CAROUSEL_SIZE = 4;
+const FEATURED_SIDE_COUNT = 3;
 
 export const metadata: Metadata = {
   title: "الرئيسية",
@@ -30,86 +31,67 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [news, settings] = await Promise.all([
-    getPublishedNews(),
-    getSiteSettings(),
-  ]);
-
-  const withImages = news.filter((item) => item.image_url);
-  const featured = withImages.filter((item) => item.featured_in_carousel);
-  const carouselItems = (featured.length > 0 ? featured : withImages).slice(
-    0,
-    CAROUSEL_SIZE
-  );
+  const [news, settings] = await Promise.all([getPublishedNews(), getSiteSettings()]);
+  const carouselItems = selectCarouselItems(news);
   const carouselIds = new Set(carouselItems.map((item) => item.id));
-  const remaining = news.filter((item) => !carouselIds.has(item.id));
-
-  const [lead, ...restAfterLead] = remaining;
-  const featuredSide = restAfterLead.slice(0, FEATURED_SIDE_COUNT);
-  const featuredIds = new Set(
-    [lead, ...featuredSide].filter(Boolean).map((item) => (item as NewsItem).id)
-  );
-
-  const sectioned = remaining.filter((item) => !featuredIds.has(item.id));
-
-  const announcements = news
-    .filter((item) => item.category === "announcements")
-    .slice(0, 3);
+  const remainingNews = news.filter((item) => !carouselIds.has(item.id));
+  const [lead, ...sideNews] = remainingNews;
+  const featuredSide = sideNews.slice(0, FEATURED_SIDE_COUNT);
+  const featuredIds = new Set([lead, ...featuredSide].filter(Boolean).map((item) => (item as NewsItem).id));
+  const sectionedNews = remainingNews.filter((item) => !featuredIds.has(item.id));
+  const announcements = news.filter((item) => item.category === "announcements").slice(0, 3);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 flex flex-col gap-10">
-      <h1 className="sr-only">{settings.school_name} — نشرة الأخبار الرسمية</h1>
+    <div className="mx-auto flex max-w-6xl flex-col gap-12 px-4 py-8 sm:py-10">
+      <h1 className="sr-only">{settings.school_name} — البوابة الرسمية</h1>
 
-      <nav aria-label="اختصارات سريعة" className="flex flex-wrap gap-2">
-        {CATEGORY_LIST.map((cat) => (
-          <Link
-            key={cat.key}
-            href={`/category/${cat.key}`}
-            className="flex items-center min-h-11 rounded-full border border-ink/15 bg-white px-4 font-utility text-sm text-ink hover:border-maroon hover:text-maroon transition-colors"
-          >
-            {cat.label}
-          </Link>
-        ))}
-      </nav>
-
-      {carouselItems.length > 0 ? (
-        <HeroCarousel items={carouselItems} />
-      ) : news.length === 0 ? (
-        <p className="font-body text-ink/60">لا توجد أخبار منشورة حاليًا.</p>
+      {announcements[0] ? (
+        <Link href={`/news/${announcements[0].slug}`} className="flex items-center justify-between gap-3 rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 font-utility text-sm text-ink transition-colors hover:bg-gold/20">
+          <span><strong className="ml-2 text-maroon">إعلان مهم</strong>{announcements[0].title}</span>
+          <span aria-hidden="true" className="shrink-0 text-lg">←</span>
+        </Link>
       ) : null}
 
-      <div className="grid gap-10 lg:grid-cols-[2fr_1fr]">
-        <div className="flex flex-col gap-10">
-          {lead ? (
-            <section className="grid gap-6 md:grid-cols-[3fr_2fr]">
-              <NewsCard item={lead} />
-              {featuredSide.length > 0 ? (
-                <div className="flex flex-col gap-4 divide-y divide-ink/10">
-                  {featuredSide.map((item) => (
-                    <div key={item.id} className="pt-4 first:pt-0">
-                      <CompactNewsItem item={item} />
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-            </section>
-          ) : null}
+      {carouselItems.length > 0 ? <HeroCarousel items={carouselItems} /> : null}
+      {news.length === 0 ? <p className="font-body text-ink/60">لا توجد أخبار منشورة حاليًا.</p> : null}
 
-          {CATEGORY_LIST.map((cat) => (
+      <ServiceLinks />
+
+      {lead ? (
+        <section className="grid gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]">
+          <div className="flex flex-col gap-5">
+            <SectionHeading eyebrow="آخر المستجدات" title="من أخبار المدرسة" href="/category/school" />
+            <NewsCard item={lead} />
+          </div>
+          {featuredSide.length > 0 ? (
+            <div className="flex flex-col gap-5">
+              <SectionHeading title="أخبار تستحق القراءة" />
+              <div className="flex flex-col divide-y divide-ink/10 rounded-xl border border-ink/10 bg-white px-4">
+                {featuredSide.map((item) => <div key={item.id} className="py-4 first:pt-5 last:pb-5"><CompactNewsItem item={item} /></div>)}
+              </div>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)] lg:items-start">
+        <div className="flex flex-col gap-12">
+          {CATEGORY_LIST.map((category) => (
             <CategorySection
-              key={cat.key}
-              category={cat.key}
-              items={sectioned
-                .filter((item) => item.category === cat.key)
-                .slice(0, 3)}
+              key={category.key}
+              category={category.key}
+              items={sectionedNews.filter((item) => item.category === category.key).slice(0, 3)}
             />
           ))}
         </div>
-
-        <div className="lg:sticky lg:top-6 lg:self-start">
-          <NoticeBoard announcements={announcements} />
-        </div>
+        <div className="lg:sticky lg:top-24"><NoticeBoard announcements={announcements} /></div>
       </div>
     </div>
   );
+}
+
+function selectCarouselItems(news: NewsItem[]) {
+  const withImages = news.filter((item) => item.image_url);
+  const featured = withImages.filter((item) => item.featured_in_carousel);
+  return (featured.length > 0 ? featured : withImages).slice(0, CAROUSEL_SIZE);
 }

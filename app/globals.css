@@ -2,12 +2,14 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #1b2a4a;
-  --paper: #edefee;
+  --ink: #14213d;
+  --paper: #f7f8f5;
+  --surface: #ffffff;
+  --surface-muted: #eef2f1;
   --gold: #d6a419;
-  --maroon: #7a1f2b;
+  --maroon: #8b2635;
   --teal: #2e6e63;
-
+  --line: rgba(20, 33, 61, 0.12);
   --font-display: "Lalezar", "Tajawal", sans-serif;
   --font-body: "Tajawal", sans-serif;
   --font-utility: "IBM Plex Sans Arabic", "Tajawal", sans-serif;
@@ -16,19 +18,17 @@
 @theme inline {
   --color-ink: var(--ink);
   --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
   --color-gold: var(--gold);
   --color-maroon: var(--maroon);
   --color-teal: var(--teal);
-
   --font-display: var(--font-display);
   --font-body: var(--font-body);
   --font-utility: var(--font-utility);
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
+html { scroll-behavior: smooth; }
 body {
   background: var(--paper);
   color: var(--ink);
@@ -36,12 +36,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  *,
-  *::before,
-  *::after {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -49,15 +45,9 @@ body {
   }
 }
 
-:focus-visible {
-  outline: 3px solid var(--gold);
-  outline-offset: 2px;
-}
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
-.pin-note {
-  transform: rotate(var(--pin-rotation, -1.5deg));
-}
-
+.pin-note { transform: rotate(var(--pin-rotation, -1.5deg)); }
 .pin-dot::before {
   content: "";
   position: absolute;
@@ -70,3 +60,5 @@ body {
   background: var(--gold);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
+
+.prose-school p + p { margin-top: 1.5rem; }
