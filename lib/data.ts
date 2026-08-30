@@ -51,7 +51,7 @@ export async function getNewsBySlug(slug: string): Promise<NewsItem | null> {
     .select("*")
     .eq("slug", slug)
     .eq("published", true)
-    .single();
+    .maybeSingle();
 
   return data ?? null;
 }
