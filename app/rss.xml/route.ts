@@ -22,12 +22,10 @@ export async function GET() {
     .from("news")
     .select("slug, title, excerpt, updated_at, created_at, publish_at")
     .eq("published", true)
-    .lte("publish_at", new Date().toISOString())
     .order("created_at", { ascending: false })
     .limit(20);
 
   const items = (data ?? [])
-    .filter((item) => !item.publish_at || new Date(item.publish_at) <= new Date())
     .map((item) => {
       const url = `${SITE_URL}/news/${item.slug}`;
       const timestamp = item.publish_at || item.updated_at || item.created_at || "";

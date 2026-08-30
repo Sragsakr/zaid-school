@@ -18,7 +18,7 @@ export const revalidate = 60;
 
 export async function generateStaticParams() {
   const supabase = createStaticClient();
-  const { data } = await supabase.from("news").select("slug").eq("published", true).lte("publish_at", new Date().toISOString());
+  const { data } = await supabase.from("news").select("slug").eq("published", true);
   return (data ?? []).map((row) => ({ slug: row.slug }));
 }
 
